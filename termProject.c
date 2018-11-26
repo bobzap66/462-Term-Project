@@ -60,39 +60,33 @@ void matrix_x_vector(int n, double y[n], double x[n][n], double A[n][n])
 int main(int argc, char* argv[])
 {
 	double t1, t2;
-    	int n = 128;
+    	int n = 256;
     	int i, j;
-    	double matrix[128][128];
-    	double vector[128];
-    	double result[1][128];
+    	double m1[256][256];
+    	double m2[256][256];
+    	double result[256][256];
     	int rank, numprocs, count, remainder, myRowSize;
     	int* sendcounts = NULL;
     	int* senddispls = NULL;
     	int* recvcounts = NULL;
     	int* recvdispls = NULL;	
     	float elapsed;
-    	srand((long)time(NULL));
+    	srand(1);
     	MPI_Init (&argc, &argv);
     	MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	if(rank == 0)
 	{	
-    		for(i = 0; i < 128; i++)
+    		for(i = 0; i < 256; i++)
     		{
-        		for(j = 0; j < 128; j++)
+        		for(j = 0; j < 256; j++)
         		{
-            			matrix[i][j] = r2();
+            			m1[i][j] = r2();
+            			m2[i][j] = r2();
+				result[i][j] = 0;
         		}
-    		}
-    		for(i = 0; i < 128; i++)
-    		{
-        		vector[i] = r2();
-    		}
-    		//print_matrix(n, matrix);
-    		//print_vector(n, vector);
-    		for(i = 0; i < 128; i++)
-    		    result[0][i] = 0;
+    		}/*
 		if(numprocs == 1)
     		{
 			t1 = MPI_Wtime();
@@ -100,36 +94,36 @@ int main(int argc, char* argv[])
 			t2 = MPI_Wtime();
     			elapsed = (t2 - t1)*1000;
     			printf("Time = %f milliseconds on one processor\n", elapsed);
-		}
+		}*/
 		sendcounts = (int*)malloc(sizeof(int)*numprocs); 
 		senddispls = (int*)malloc(sizeof(int)*numprocs); 
 		recvcounts = (int*)malloc(sizeof(int)*numprocs); 
 		recvdispls = (int*)malloc(sizeof(int)*numprocs); 
-		count = 128/numprocs;
-		remainder = 128 - count * numprocs;
+		count = 256/numprocs;
+		remainder = 256 - count * numprocs;
 		int prefixSum = 0;
 		for(i = 0; i < numprocs; i++)
 		{
 			recvcounts[i] = (i < remainder) ? count+1 : count;
-		        sendcounts[i] = recvcounts[i] * 128;
+		        sendcounts[i] = recvcounts[i] * 256;
 			recvdispls[i] = prefixSum;
-			senddispls[i] = prefixSum * 128;
+			senddispls[i] = prefixSum * 256;
 			prefixSum += recvcounts[i];
 		}
 	}
 	
 	MPI_Barrier(MPI_COMM_WORLD);
 	t1 = MPI_Wtime();
-	MPI_Bcast(vector, 128, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Bcast(vector, 256, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 //	printf("My rank is %d and the first element in my vector is %f\n", rank, vector[0]);
 	if (rank != 0)
 	{
-		count = 128 / numprocs;
-		remainder = 128 - count * numprocs;
+		count = 256 / numprocs;
+		remainder = 256 - count * numprocs;
 	}
 	myRowSize = rank < remainder ? count + 1: count;
-	double* matrixPart = (double*)malloc(sizeof(double) * myRowSize * 128);
-	MPI_Scatterv(matrix, sendcounts, senddispls, MPI_DOUBLE, matrixPart, myRowSize * 128, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	double* matrixPart = (double*)malloc(sizeof(double) * myRowSize * 256);
+	MPI_Scatterv(matrix, sendcounts, senddispls, MPI_DOUBLE, matrixPart, myRowSize * 256, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 	if(rank == 0)
 	{
 		free(sendcounts);
@@ -140,9 +134,9 @@ int main(int argc, char* argv[])
 	for (i = 0; i < myRowSize; i++)
 	{
 		resultPart[i] = 0;
-		for (j = 0; j < 128; j++)
+		for (j = 0; j < 256; j++)
 		{
-			resultPart[i] += matrixPart[i * 128 + j] * vector[j];
+			resultPart[i] += matrixPart[i * 256 + j] * vector[j];
 		}
 	}
 	free(matrixPart);
@@ -160,7 +154,7 @@ int main(int argc, char* argv[])
 	if( rank == 0)
 	{
 		printf("Results:\n");
-		for( i = 0; i < 128; i++)
+		for( i = 0; i < 256; i++)
 			printf("%f ", result[0][i]);
 		printf("\n");
     		printf("Time = %f milliseconds on %d processors\n", elapsed, numprocs);
