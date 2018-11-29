@@ -1,3 +1,5 @@
+/*This program contains a lot of unnecessary functions that were skeletons for the second part of this program.*/
+
 #include <stdlib.h>
 #include <mpi.h>
 #include <stdio.h>
@@ -5,27 +7,28 @@
 #include <math.h>
 
 #define N 256
-
+//converts a i and j into an array index
 int matrixToArray(int i, int j)
 {
 	int k;
 	k = i * N + j;
 	return k;
 }
-
+//retrieves the i value from an array index
 int getI(int k)
 {
 	int i;
 	i = k / N;
 	return i;
 }
-
+//retrieves the j index from an array index
 int getJ(int k)
 {
 	int j;
 	j = k%N;
 	return j;
 }
+//returns a random number between -1 and 1
 double r2()
 {
 	double rv;
@@ -33,7 +36,7 @@ double r2()
 	rv = rv - rand()%2;
 	return rv;
 }
-
+//prints a matrix
 void printMatrix(double m[N*N])
 {
 	int i, j;
@@ -47,7 +50,7 @@ void printMatrix(double m[N*N])
 	}
 	printf("\n");
 }
-
+//performs linear matrix matrix multiplication
 void matrixMatrix(double m1[N*N], double m2[N*N], double result[N*N])
 {
 	int i, j, k, x, y;
@@ -68,14 +71,6 @@ void matrixMatrix(double m1[N*N], double m2[N*N], double result[N*N])
 		sum = 0;
 		}
 	}
-}
-int proc_map(int i, int size)
-{
-    	size = size - 1;
-	int r;
-	r = N/size;
-    	int proc = i / r;
-    	return proc + 1;
 }
 
 
@@ -103,8 +98,8 @@ int main(int argc, char* argv[])
 			m2[i] = r2();
 			result[i] = 0;
 		}
-		printMatrix(m1);
-		printMatrix(m2);
+	//	printMatrix(m1);
+	//	printMatrix(m2);
 		t1 = MPI_Wtime();
 		if(numprocs == 1)
 			matrixMatrix(m1, m2, result);
