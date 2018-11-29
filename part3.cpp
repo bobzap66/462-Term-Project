@@ -19,9 +19,9 @@ int main() {
 	int temp = 0;
 	int destination = 0;
 	int source = 0;
-	int rowB = (MATRIX_SIZE * MATRIX_SIZE) / (size * size);
-	int columnB = (MATRIX_SIZE * MATRIX_SIZE) / (size * size);
-	int blockSize = rowB * columnB;
+	int blockSize = (MATRIX_SIZE * MATRIX_SIZE) / size;
+	int rowB = sqrt(blockSize);
+	int columnB = rowB;
 	double A[MATRIX_SIZE][MATRIX_SIZE];
 	double B[MATRIX_SIZE][MATRIX_SIZE];
 	double C[MATRIX_SIZE][MATRIX_SIZE];
